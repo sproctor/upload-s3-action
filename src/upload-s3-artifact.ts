@@ -3,7 +3,7 @@ import S3 from 'aws-sdk/clients/s3'
 import {findFilesToUpload} from './search'
 import {createReadStream} from 'fs'
 import {join, relative} from 'path'
-import lookup from 'mime-types'
+import {lookup} from 'mime-types'
 
 const AWS_KEY_ID = core.getInput('aws_key_id', {
   required: true
@@ -71,7 +71,7 @@ async function run(): Promise<void> {
       }
     )
   }  catch (err) {
-    core.setFailed(err.message)
+    core.setFailed((err as Error).message)
   }
 }
 
