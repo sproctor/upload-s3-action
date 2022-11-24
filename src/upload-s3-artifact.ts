@@ -29,21 +29,21 @@ const s3 = new S3({
 async function upload(file: string, rootDirectory: string): Promise<void> {
   return new Promise(resolve => {
     const fileStream = createReadStream(file)
-    const bucketPath = join(DESTINATION_DIR, relative(rootDirectory, file));
+    const bucketPath = join(DESTINATION_DIR, relative(rootDirectory, file)).replace(/\\/g, '/')
       const params = {
         Bucket: BUCKET,
         ACL: 'public-read',
         Body: fileStream,
         Key: bucketPath,
         ContentType: lookup(file) || 'text/plain'
-      };
+      }
     s3.upload(params, (err, data) => {
-      if (err) core.error(err);
-      core.info(`uploaded - ${data.Key}`);
-      core.info(`located - ${data.Location}`);
-      resolve(data.Location);
-    });
-  });
+      if (err) core.error(err)
+      core.info(`uploaded - ${data.Key}`)
+      core.info(`located - ${data.Location}`)
+      resolve(data.Location)
+    })
+  })
 }
 
 async function run(): Promise<void> {
