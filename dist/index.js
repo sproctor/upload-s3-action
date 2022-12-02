@@ -29683,19 +29683,22 @@ const search_1 = __nccwpck_require__(3930);
 const fs_1 = __nccwpck_require__(7147);
 const path_1 = __nccwpck_require__(1017);
 const mime_types_1 = __nccwpck_require__(3583);
-const AWS_KEY_ID = core.getInput('aws_key_id', {
+const AWS_KEY_ID = core.getInput('aws-key-id', {
     required: true
 });
-const SECRET_ACCESS_KEY = core.getInput('aws_secret_access_key', {
+const SECRET_ACCESS_KEY = core.getInput('aws-secret-access-key', {
     required: true
 });
-const BUCKET = core.getInput('aws_bucket', {
+const BUCKET = core.getInput('aws-bucket', {
     required: true
 });
 const PATH = core.getInput('path', {
     required: true
 });
-const DESTINATION_DIR = core.getInput('destination_dir', {
+const DESTINATION_PATH = core.getInput('destination-path', {
+    required: false
+});
+const USE_RELATIVE_PATH = core.getInput('use-relative-path', {
     required: false
 });
 const s3 = new s3_1.default({
@@ -29706,7 +29709,7 @@ function upload(file, rootDirectory) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise(resolve => {
             const fileStream = (0, fs_1.createReadStream)(file);
-            const bucketPath = (0, path_1.join)(DESTINATION_DIR, (0, path_1.relative)(rootDirectory, file));
+            const bucketPath = (0, path_1.join)(DESTINATION_PATH, USE_RELATIVE_PATH ? (0, path_1.relative)(rootDirectory, file) : (0, path_1.basename)(file)).replace(/\\/g, '/').normalize();
             const params = {
                 Bucket: BUCKET,
                 ACL: 'public-read',
