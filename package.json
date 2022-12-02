@@ -1,11 +1,11 @@
 {
   "name": "upload-s3-action",
   "description": "Upload directory to AWS S3",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "main": "dist/index.js",
   "license": "MIT",
   "repository": "https://github.com/sproctor/upload-s3-action",
-  "author": "Dong Keon Kim <amos@shallwefootball.com>",
+  "author": "Sean Proctor <sproctor@gmail.com>",
   "scripts": {
     "build": "tsc",
     "release": "ncc build src/upload-s3-artifact.ts && git add -f dist/",
