@@ -2,24 +2,27 @@ import * as core from '@actions/core'
 import S3 from 'aws-sdk/clients/s3'
 import {findFilesToUpload} from './search'
 import {createReadStream} from 'fs'
-import {join, relative} from 'path'
+import {basename, join, relative} from 'path'
 import {lookup} from 'mime-types'
 
-const AWS_KEY_ID = core.getInput('aws_key_id', {
+const AWS_KEY_ID = core.getInput('aws-key-id', {
   required: true
-});
-const SECRET_ACCESS_KEY = core.getInput('aws_secret_access_key', {
+})
+const SECRET_ACCESS_KEY = core.getInput('aws-secret-access-key', {
   required: true
-});
-const BUCKET = core.getInput('aws_bucket', {
+})
+const BUCKET = core.getInput('aws-bucket', {
   required: true
-});
+})
 const PATH = core.getInput('path', {
   required: true
-});
-const DESTINATION_DIR = core.getInput('destination_dir', {
+})
+const DESTINATION_PATH = core.getInput('destination-path', {
   required: false
-});
+})
+const USE_RELATIVE_PATH = core.getInput('use-relative-path', {
+  required: false
+})
 
 const s3 = new S3({
   accessKeyId: AWS_KEY_ID,
@@ -29,14 +32,17 @@ const s3 = new S3({
 async function upload(file: string, rootDirectory: string): Promise<void> {
   return new Promise(resolve => {
     const fileStream = createReadStream(file)
-    const bucketPath = join(DESTINATION_DIR, relative(rootDirectory, file)).replace(/\\/g, '/')
-      const params = {
-        Bucket: BUCKET,
-        ACL: 'public-read',
-        Body: fileStream,
-        Key: bucketPath,
-        ContentType: lookup(file) || 'text/plain'
-      }
+    const bucketPath = join(
+      DESTINATION_PATH,
+      USE_RELATIVE_PATH ? relative(rootDirectory, file) : basename(file)
+    ).replace(/\\/g, '/').normalize()
+    const params = {
+      Bucket: BUCKET,
+      ACL: 'public-read',
+      Body: fileStream,
+      Key: bucketPath,
+      ContentType: lookup(file) || 'text/plain'
+    }
     s3.upload(params, (err, data) => {
       if (err) core.error(err)
       core.info(`uploaded - ${data.Key}`)

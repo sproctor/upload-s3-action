@@ -5,22 +5,26 @@ branding:
   icon: 'upload-cloud'
   color: 'orange'
 inputs:
-  aws_key_id:
+  aws-key-id:
     description: 'aws key id'
     required: true
-  aws_secret_access_key:
+  aws-secret-access-key:
     description: 'aws secret access key'
     required: true
-  aws_bucket:
+  aws-bucket:
     description: 'aws bucket name'
     required: true
   path:
     required: true
     description: 'path(s) to upload'
-  destination_dir:
+  destination-path:
     required: false
     default: /
     description: 'destination directory for upload'
+  use-relative-path:
+    required: false
+    default: false
+    description: 'include relative filesystem path in S3 bucket path'
 outputs:
   object_key:
     description: 'object key'
