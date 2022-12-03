@@ -36,6 +36,7 @@ async function upload(file: string, rootDirectory: string): Promise<void> {
       DESTINATION_PATH,
       USE_RELATIVE_PATH ? relative(rootDirectory, file) : basename(file)
     ).replace(/\\/g, '/').normalize()
+    core.debug(`bucket path: ${bucketPath}`)
     const params = {
       Bucket: BUCKET,
       ACL: 'public-read',
@@ -45,8 +46,7 @@ async function upload(file: string, rootDirectory: string): Promise<void> {
     }
     s3.upload(params, (err, data) => {
       if (err) core.error(err)
-      core.info(`uploaded - ${data.Key}`)
-      core.info(`located - ${data.Location}`)
+      core.info(`uploaded - ${data.Key} to ${data.Location}`)
       resolve(data.Location)
     })
   })
@@ -54,6 +54,9 @@ async function upload(file: string, rootDirectory: string): Promise<void> {
 
 async function run(): Promise<void> {
   try {
+    core.debug(`use-relative-path: ${USE_RELATIVE_PATH}`)
+    core.debug(`path: ${PATH}`)
+    core.debug(`destination path: ${DESTINATION_PATH}`)
     const searchResult = await findFilesToUpload(PATH)
     if (searchResult.filesToUpload.length === 0) {
       core.setFailed(
@@ -71,11 +74,9 @@ async function run(): Promise<void> {
       )
     }
 
-    searchResult.filesToUpload.forEach(
-      file => {
-        upload(file, searchResult.rootDirectory)
-      }
-    )
+    for (const file of searchResult.filesToUpload) {
+      await upload(file, searchResult.rootDirectory)
+    }
   }  catch (err) {
     core.setFailed((err as Error).message)
   }
