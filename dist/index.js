@@ -29698,7 +29698,7 @@ const PATH = core.getInput('path', {
 const DESTINATION_PATH = core.getInput('destination-path', {
     required: false
 });
-const USE_RELATIVE_PATH = core.getInput('use-relative-path', {
+const USE_RELATIVE_PATH = core.getBooleanInput('use-relative-path', {
     required: false
 });
 const s3 = new s3_1.default({
@@ -29710,6 +29710,7 @@ function upload(file, rootDirectory) {
         return new Promise(resolve => {
             const fileStream = (0, fs_1.createReadStream)(file);
             const bucketPath = (0, path_1.join)(DESTINATION_PATH, USE_RELATIVE_PATH ? (0, path_1.relative)(rootDirectory, file) : (0, path_1.basename)(file)).replace(/\\/g, '/').normalize();
+            core.debug(`bucket path: ${bucketPath}`);
             const params = {
                 Bucket: BUCKET,
                 ACL: 'public-read',
@@ -29720,8 +29721,7 @@ function upload(file, rootDirectory) {
             s3.upload(params, (err, data) => {
                 if (err)
                     core.error(err);
-                core.info(`uploaded - ${data.Key}`);
-                core.info(`located - ${data.Location}`);
+                core.info(`uploaded - ${data.Key} to ${data.Location}`);
                 resolve(data.Location);
             });
         });
@@ -29730,6 +29730,9 @@ function upload(file, rootDirectory) {
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            core.debug(`use-relative-path: ${USE_RELATIVE_PATH}`);
+            core.debug(`path: ${PATH}`);
+            core.debug(`destination path: ${DESTINATION_PATH}`);
             const searchResult = yield (0, search_1.findFilesToUpload)(PATH);
             if (searchResult.filesToUpload.length === 0) {
                 core.setFailed(`No files were found with the provided path: ${PATH}. No artifacts will be uploaded.`);
@@ -29739,9 +29742,9 @@ function run() {
             if (searchResult.filesToUpload.length > 10000) {
                 core.warning(`There are over 10,000 files in this artifact, consider creating an archive before upload to improve the upload performance.`);
             }
-            searchResult.filesToUpload.forEach(file => {
-                upload(file, searchResult.rootDirectory);
-            });
+            for (const file of searchResult.filesToUpload) {
+                yield upload(file, searchResult.rootDirectory);
+            }
         }
         catch (err) {
             core.setFailed(err.message);
