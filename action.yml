@@ -1,6 +1,6 @@
 name: Upload S3
 description: 'Upload directory to S3'
-author: 'Dong Keon Kim'
+author: 'Sean Proctor'
 branding:
   icon: 'upload-cloud'
   color: 'orange'

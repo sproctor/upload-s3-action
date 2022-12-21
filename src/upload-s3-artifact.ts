@@ -20,7 +20,7 @@ const PATH = core.getInput('path', {
 const DESTINATION_PATH = core.getInput('destination-path', {
   required: false
 })
-const USE_RELATIVE_PATH = core.getInput('use-relative-path', {
+const USE_RELATIVE_PATH = core.getBooleanInput('use-relative-path', {
   required: false
 })
 
